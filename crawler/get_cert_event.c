@@ -73,19 +73,15 @@ init_ssl_locking(void)
 struct config {
 	uint16_t port;
 	int connect_timeout;	// how long to wait for connecting (seconds)
-	int read_timeout;		// how long to wait once connected for the banner (seconds)
 	int current_running;
 	int max_concurrent;
 	struct event_base *base;
 	struct bufferevent *stdin_bev;
 	int stdin_closed;
-	char *send_str;
-	long send_str_size;
 
 	struct stats_st {
-		int hosts_tried;
-		int hosts_connected;
-		int certs_gathered;
+		uint64_t hosts_tried;
+		uint64_t certs_gathered;
 	} stats;
 };
 
@@ -104,10 +100,18 @@ int verify(int v, X509_STORE_CTX *c)
 	(void) c;
 	return 1;
 }
+struct event *status_timer;
 char cafile[4096];
 void stdin_readcb(struct bufferevent *bev, void *ptr);
-void print_status(evutil_socket_t fd, short events, void *conf)
+void print_status(evutil_socket_t fd, short events, void *arg)
 {
+	struct config *conf = arg;
+	printf("STATUS: (%d/%d) used %llu connection attempts %llu certs gathered\n",
+			conf->current_running, conf->max_concurrent,
+			conf->stats.hosts_tried,
+			conf->stats.certs_gathered);
+	struct timeval status_timeout = {5, 0};
+	evtimer_add(status_timer, &status_timeout);
 }
 void decrement_cur_running(struct state *st)
 {
@@ -115,6 +119,7 @@ void decrement_cur_running(struct state *st)
 	free(st->ip_str);
 	SSL_CTX_free(st->ctx);
 	free(st);
+	conf->current_running--;
 
 	if (evbuffer_get_length(bufferevent_get_input(conf->stdin_bev)) > 0) {
 		stdin_readcb(conf->stdin_bev, conf);
@@ -133,11 +138,9 @@ void sslconnect_cb(struct bufferevent *bev, short events, void *arg)
 		X509 *cert = SSL_get_peer_certificate(ssl);
 		FILE *fp = fopen(st->ip_str,"w");
 		PEM_write_X509(fp, cert);
-		printf("Got cert from %s\n", st->ip_str);
-		//st->conf.stats.certs_gathered++;
+		st->conf->stats.certs_gathered++;
 		fclose(fp);
 	} else {
-		printf("Failed to connect to %s\n", st->ip_str);
 	}
 	bufferevent_free(bev);
 	decrement_cur_running(st);
@@ -223,16 +226,12 @@ void stdin_eventcb(struct bufferevent *bev, short events, void *ptr)
 int main(int argc, char *argv[])
 {
 	struct event_base *base;
-	struct event *status_timer;
-	struct timeval status_timeout = {1, 0};
+	struct timeval status_timeout = {5, 0};
 	int c;
 	struct option long_options[] = {
 		{"concurrent", required_argument, 0, 'c'},
 		{"port", required_argument, 0, 'p'},
 		{"conn-timeout", required_argument, 0, 't'},
-		{"read-timeout", required_argument, 0, 'r'},
-		{"verbosity", required_argument, 0, 'v'},
-		{"data", required_argument, 0, 'd'},
 		{"ca", required_argument, 0, 'f'},
 		{0, 0, 0, 0} };
 
@@ -266,14 +265,12 @@ int main(int argc, char *argv[])
 	conf.current_running = 0;
 	memset(&conf.stats, 0, sizeof(conf.stats));
 	conf.connect_timeout = 4;
-	conf.read_timeout = 4;
 	conf.stdin_closed = 0;
-	conf.send_str = NULL;
 
 	// Parse command line args
 	while (1) {
 		int option_index = 0;
-		c = getopt_long(argc, argv, "c:p:t:r:v:f:d:",
+		c = getopt_long(argc, argv, "c:p:t:f:",
 				long_options, &option_index);
 
 		if (c < 0) {
@@ -290,20 +287,13 @@ int main(int argc, char *argv[])
 		case 't':
 			conf.connect_timeout = atoi(optarg);
 			break;
-		case 'r':
-			conf.read_timeout = atoi(optarg);
-			break;
-		case 'v':
-			if (atoi(optarg) >= 0 && atoi(optarg) <= 5) {
-			}
-			break;
 		case 'f':
 			strncpy(cafile, optarg, sizeof(cafile));
 			break;
 		case '?':
 			printf("Usage:\n");
-			printf("\t%s [-c max_concurrency] [-t connect_timeout] [-r read_timeout] \n\t"
-				   "[-v verbosity=0-5] [-f cafile] -p port\n", argv[0]);
+			printf("\t%s [-c max_concurrency] [-t connect_timeout] "
+				   "[-f cafile] -p port\n", argv[0]);
 			exit(1);
 		default:
 			break;
