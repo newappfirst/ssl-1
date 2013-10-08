@@ -37,7 +37,7 @@ def generate(certificates, base_cert, signing_key, max_extensions=20, count=1):
         # then pick one entry randomly from each type
         # pyOpenSSL doesn't really support poking into the data
         # so currently avoiding doing anything inside extensions
-        print len(extensions.keys())
+        # TODO: Multiple extensions of the same type?
         sample = random.randint(0, max_extensions)
         choices = random.sample(extensions.keys(), sample)
         new_extensions = [random.choice(extensions[name]) for name in choices]
