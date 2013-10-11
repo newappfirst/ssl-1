@@ -6,7 +6,13 @@ def get_extension_dict(certs):
     for cert in certs:
         extensions = get_extensions(cert)
         for extension in extensions:
-            d[extension.get_short_name()].add(extension)
+
+            """
+            PyOpenSSL's get_short_name return UNKN for all unknown extensions
+            This is bad for a mapping, so I added a get_oid function.
+            See get_oid.patch
+            """
+            d[extension.get_oid()].add(extension)
     for k in d.keys():
         d[k] = list(d[k])
     return d
