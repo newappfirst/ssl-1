@@ -89,7 +89,7 @@ int main(int argc, char **argv)
 	} else {
 		rv = 0;
 	}
-	printf("%d:%s\n", rv, errorString);
+	printf("%d\n", rv);
 	close(sockfd);
 	return EXIT_SUCCESS;
 }

@@ -152,7 +152,7 @@ int main (int argc, char **argv)
 
 
   gnutls_bye (session, GNUTLS_SHUT_RDWR);
-  printf("%d:%s\n", verification_result, error);
+  printf("%d\n", verification_result);
 end:
 
   close(sd);

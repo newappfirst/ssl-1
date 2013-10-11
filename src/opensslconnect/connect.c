@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 			snprintf(errorString, sizeof(errorString), "%s", X509_verify_cert_error_string(rv));
 		}
 	}
-	printf("%d:%s\n", rv, errorString);
+	printf("%d\n", rv);
 	close(sockfd);
 	return EXIT_SUCCESS;
 }

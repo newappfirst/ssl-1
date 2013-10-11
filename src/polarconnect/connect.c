@@ -191,7 +191,7 @@ int main( int argc, char *argv[] )
     {
 	    ret = ret & ~BADCERT_CN_MISMATCH;
     }
-    printf("%d:\n", ret);
+    printf("%d\n", ret);
 
 
     ssl_close_notify( &ssl );
