@@ -27,14 +27,13 @@ def generate(certificates, base_cert, signing_key, max_extensions=20, count=1):
         cert = crypto.X509()
         # handle the boring entries
         cert.set_pubkey(base_cert.get_pubkey())
+        cert.set_issuer(base_cert.get_issuer())
         pick = random.choice(certificates)
         cert.set_notAfter(pick.get_notAfter())
         pick = random.choice(certificates)
         cert.set_notBefore(pick.get_notBefore())
         pick = random.choice(certificates)
         cert.set_serial_number(pick.get_serial_number())
-        pick = random.choice(certificates)
-        cert.set_issuer(pick.get_issuer())
         pick = random.choice(certificates)
         cert.set_subject(pick.get_subject())
 
