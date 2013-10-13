@@ -19,9 +19,10 @@ def get_extension_dict(certs):
 def get_extensions(cert):
     return  [cert.get_extension(i) \
                 for i in range(0, cert.get_extension_count())]
-def generate(certificates, base_cert, signing_key, max_extensions=20, count=1):
+def generate(certificates, base_cert, signing_key, max_extensions=20, count=1, extensions = None):
     certs = []
-    extensions = get_extension_dict(certificates)
+    if extensions is None:
+        extensions = get_extension_dict(certificates)
     max_extensions = min(max_extensions, len(extensions.keys()))
     for i in range(count):
         cert = crypto.X509()

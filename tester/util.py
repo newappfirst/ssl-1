@@ -11,5 +11,5 @@ def find_discrepancies(certificate_dir, test_scripts, ca_file, key_file\
         results = new_res
     else:
         results = base_results
-    disc = { k : base_results[k] for k,v in results.items() if not all(v[0] == e for e in v)}
+    disc = { k : base_results[k] for k,v in results.items() if not all(v[0] == e or e != '0' for e in v)}
     return disc
