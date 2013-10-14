@@ -5,6 +5,7 @@ import sys
 import shutil
 import hashlib
 from OpenSSL import crypto
+MAX_SAMPLES = 512
 def hashfile(filepath):
     sha1 = hashlib.sha1()
     f = open(filepath, 'rb')
@@ -33,7 +34,7 @@ extensions = franken.get_extension_dict(certs)
 while True:
     if not os.path.exists(temp_dir):
         os.mkdir(temp_dir)
-    genned = franken.generate(certs, base, ca, count=batch_size, extensions = extensions)
+    genned = franken.generate(certs, base, ca, max_extensions=6, count=batch_size, extensions = extensions)
     franken.util.dump_certs(genned, "fuzzer", temp_dir)
     difs = tester.util.find_discrepancies(temp_dir, test_scripts, ca_file, key_file, ignore_none = True)
     for cert, error in difs.items():
@@ -42,6 +43,8 @@ while True:
         cert_path = os.path.join(temp_dir, cert)
         if not os.path.exists(out):
             os.mkdir(out)
+        if len(os.listdir(out)) > MAX_SAMPLES:
+            continue
         shutil.move(os.path.join(temp_dir, cert),\
                 os.path.join(out, hashfile(cert_path)))
     shutil.rmtree(temp_dir)
