@@ -1,3 +1,4 @@
+/* stripped down version of the sample client.c provided with MatrixSSL*/
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/types.h>
