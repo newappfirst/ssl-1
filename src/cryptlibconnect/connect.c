@@ -5,7 +5,6 @@
 #include "stdio.h"
 
 #define TRACE(s, ...) fprintf(stderr, s, ##__VA_ARGS__)
-#define CONNECT_OK  0
 
 /*todo: print errors from util.c*/
 int importCertFile( CRYPT_CERTIFICATE *cryptCert, const char* fileName ) {
@@ -33,8 +32,12 @@ int main(int argc, char **argv) {
 	int   status;
   char* serverName;
 
+
 	CRYPT_CERTIFICATE cryptCert;
   CRYPT_SESSION cryptSession;
+  CRYPT_CERTIFICATE *trustedCert;
+  CRYPT_ATTRIBUTE_TYPE errorLocus;
+  CRYPT_ERRTYPE_TYPE errorType;
 
   if (argc == 4) {
     host = argv[1];
@@ -47,15 +50,18 @@ int main(int argc, char **argv) {
   memset(&cryptSession, 0, sizeof(cryptSession));
 
   status = cryptInit();
-  if (status != CONNECT_OK) {
+  if (status != CRYPT_OK) {
     TRACE("Failed to initialize library : %d\n", status);
     return -1;
   }
 
+  if(AddGloballyTrustedCert(&trustedCert) == FALSE) {
+    return -1;
+  }
 
   //Create the session
   status = cryptCreateSession(&cryptSession, CRYPT_UNUSED, CRYPT_SESSION_SSL );
-  if (status != CONNECT_OK) {
+  if (status != CRYPT_OK) {
     TRACE("Failed to crate session : %d\n", status);
     return -1;
   }
@@ -65,7 +71,7 @@ int main(int argc, char **argv) {
   status = cryptSetAttributeString( cryptSession,
 								CRYPT_SESSINFO_SERVER_NAME, serverName,
 								paramStrlen( serverName ) );
-  if (status != CONNECT_OK) {
+  if (status != CRYPT_OK) {
     TRACE("Failed cryptSetAttribute CRYPT_SESSINFO_SERVER_NAME: %d\n", status);
     return -1;
   }
@@ -74,21 +80,112 @@ int main(int argc, char **argv) {
   //Specify the Port
   status = cryptSetAttribute( cryptSession,
 								CRYPT_SESSINFO_SERVER_PORT,
-                443 );
-  if (status != CONNECT_OK) {
+                port );
+  if (status != CRYPT_OK) {
     TRACE("Failed cryptSetAttribute CRYPT_SESSINFO_SERVER_PORT: %d\n", status);
     return -1;
   }
 
   // Activate the session
   status = cryptSetAttribute( cryptSession, CRYPT_SESSINFO_ACTIVE, TRUE );
-  if (status != CONNECT_OK) {
-    printf("Failed to setup connection : %d\n", status);
+	if( cryptStatusError( status ) ) {
+    if (status == CRYPT_ERROR_INVALID) {
+      printf("%d\n",CRYPT_ERROR_INVALID);
+      /*
+       * Todo: if we need to know the reason :
+       * CRYPT_CERTIFICATE cryptCertificate;
+       * cryptGetAttribute( cryptSession, CRYPT_SESSINFO_RESPONSE, &cryptCertificate );
+       */
+      return 0;
+    }
+    else {
+      TRACE("Failed to setup connection : %d\n", status);
+      return -1;
+    }
   }
-  else {
-    printf("%d\n",CONNECT_OK);
-  }
+  else
+    printf("%d\n",CRYPT_OK);
 
-  return CONNECT_OK;
+
+  DeleteGloballyTrustedCert(trustedCert);
+  return CRYPT_OK;
 
 }
+
+
+
+int AddGloballyTrustedCert(CRYPT_CERTIFICATE *trustedCert) {
+	int status;
+
+	/* Read the CA root certificate and make it trusted */
+	status = importCertFromTemplate(trustedCert, "/Users/bray/github/ssl/src/cryptlibconnect/ALL_RSA_CAS.pem", 1 );
+	if( cryptStatusError( status ) )
+		{
+		puts( "Couldn't read certificate from file, skipping test of trusted "
+			  "certificate write..." );
+		return( TRUE );
+		}
+	cryptSetAttribute( *trustedCert, CRYPT_CERTINFO_TRUSTED_IMPLICIT, TRUE );
+
+	/* Update the config file with the globally trusted certificate */
+	status = cryptSetAttribute( CRYPT_UNUSED, CRYPT_OPTION_CONFIGCHANGED,
+								FALSE );
+	if( cryptStatusError( status ) )
+		{
+		printf( "Globally trusted certificate add failed with error code "
+				"%d, line %d.\n", status, __LINE__ );
+		return( FALSE );
+		}
+
+#if 0
+  /* Make the certificate untrusted and update the config again */
+	cryptSetAttribute( *trustedCert, CRYPT_CERTINFO_TRUSTED_IMPLICIT, FALSE );
+	status = cryptSetAttribute( CRYPT_UNUSED, CRYPT_OPTION_CONFIGCHANGED,
+								FALSE );
+	if( cryptStatusError( status ) )
+		{
+		printf( "Globally trusted certificate delete failed with error code "
+				"%d, line %d.\n", status, __LINE__ );
+		return( FALSE );
+		}
+#endif
+
+	puts( "Globally trusted certificate add succeeded.\n" );
+	return( TRUE );
+}
+
+int DeleteGloballyTrustedCert(CRYPT_CERTIFICATE trustedCert) {
+	int status;
+
+	/* Make the certificate untrusted and update the config again */
+	cryptSetAttribute( trustedCert, CRYPT_CERTINFO_TRUSTED_IMPLICIT, FALSE );
+	status = cryptSetAttribute( CRYPT_UNUSED, CRYPT_OPTION_CONFIGCHANGED,
+								FALSE );
+	if( cryptStatusError( status ) )
+		{
+		printf( "Globally trusted certificate delete failed with error code "
+				"%d, line %d.\n", status, __LINE__ );
+		return( FALSE );
+		}
+
+	return( TRUE );
+}
+
+
+int importCertFromTemplate( CRYPT_CERTIFICATE *cryptCert,
+							const C_STR fileTemplate, const int number )
+	{
+	BYTE filenameBuffer[ FILENAME_BUFFER_SIZE ];
+#ifdef UNICODE_STRINGS
+	wchar_t wcBuffer[ FILENAME_BUFFER_SIZE ];
+#endif /* UNICODE_STRINGS */
+
+	filenameFromTemplate( filenameBuffer, fileTemplate, number );
+#ifdef UNICODE_STRINGS
+	mbstowcs( wcBuffer, filenameBuffer, strlen( filenameBuffer ) + 1 );
+	return( importCertFile( cryptCert, wcBuffer ) );
+#else
+	return( importCertFile( cryptCert, filenameBuffer ) );
+#endif /* UNICODE_STRINGS */
+	}
+
