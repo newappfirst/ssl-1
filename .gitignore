@@ -3,3 +3,11 @@
 certs/*
 keys/*
 .swp
+
+src/cryptlibconnect/.connect.c.swp
+
+src/.connect.c.swp
+
+src/cryptlibconnect/ALL_RSA_CAS.pem
+
+src/cryptlibconnect/connect
