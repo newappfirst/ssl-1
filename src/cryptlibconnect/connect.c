@@ -25,6 +25,72 @@ int importCertFile( CRYPT_CERTIFICATE *cryptCert, const char* fileName ) {
 }
 
 
+
+
+
+int AddGloballyTrustedCert(CRYPT_CERTIFICATE *trustedCert, C_STR fileTemplate) {
+	int status;
+
+	/* Read the CA root certificate and make it trusted */
+	status = importCertFromTemplate(trustedCert, fileTemplate, 1 );
+	if( cryptStatusError( status ) )
+		{
+		puts( "Couldn't read certificate from file, skipping test of trusted "
+			  "certificate write..." );
+		return( TRUE );
+		}
+	cryptSetAttribute( *trustedCert, CRYPT_CERTINFO_TRUSTED_IMPLICIT, TRUE );
+
+	/* Update the config file with the globally trusted certificate */
+	status = cryptSetAttribute( CRYPT_UNUSED, CRYPT_OPTION_CONFIGCHANGED,
+								FALSE );
+	if( cryptStatusError( status ) )
+		{
+		printf( "Globally trusted certificate add failed with error code "
+				"%d, line %d.\n", status, __LINE__ );
+		return( FALSE );
+		}
+
+	puts( "Globally trusted certificate add succeeded.\n" );
+	return( TRUE );
+}
+
+int DeleteGloballyTrustedCert(CRYPT_CERTIFICATE trustedCert) {
+	int status;
+
+	/* Make the certificate untrusted and update the config again */
+	cryptSetAttribute( trustedCert, CRYPT_CERTINFO_TRUSTED_IMPLICIT, FALSE );
+	status = cryptSetAttribute( CRYPT_UNUSED, CRYPT_OPTION_CONFIGCHANGED,
+								FALSE );
+	if( cryptStatusError( status ) )
+		{
+		printf( "Globally trusted certificate delete failed with error code "
+				"%d, line %d.\n", status, __LINE__ );
+		return( FALSE );
+		}
+
+	return( TRUE );
+}
+
+
+int importCertFromTemplate( CRYPT_CERTIFICATE *cryptCert,
+							const C_STR fileTemplate, const int number )
+	{
+	BYTE filenameBuffer[ FILENAME_BUFFER_SIZE ];
+#ifdef UNICODE_STRINGS
+	wchar_t wcBuffer[ FILENAME_BUFFER_SIZE ];
+#endif /* UNICODE_STRINGS */
+
+	filenameFromTemplate( filenameBuffer, fileTemplate, number );
+#ifdef UNICODE_STRINGS
+	mbstowcs( wcBuffer, filenameBuffer, strlen( filenameBuffer ) + 1 );
+	return( importCertFile( cryptCert, wcBuffer ) );
+#else
+	return( importCertFile( cryptCert, filenameBuffer ) );
+#endif /* UNICODE_STRINGS */
+	}
+
+
 int main(int argc, char **argv) {
 	char  *host = "https://www.pcwebshop.co.uk/";
 	int   port  = 443;
@@ -35,7 +101,7 @@ int main(int argc, char **argv) {
 
 	CRYPT_CERTIFICATE cryptCert;
   CRYPT_SESSION cryptSession;
-  CRYPT_CERTIFICATE *trustedCert;
+  CRYPT_CERTIFICATE trustedCert;
   CRYPT_ATTRIBUTE_TYPE errorLocus;
   CRYPT_ERRTYPE_TYPE errorType;
 
@@ -43,6 +109,9 @@ int main(int argc, char **argv) {
     host = argv[1];
 	  port = atoi(argv[2]);
 	  cafile = argv[3];
+  }  else {
+    printf("!!Incorrect arguments");
+    return -1;
   }
 
 	printf("Testing Cryptlib\n");
@@ -55,7 +124,7 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  if(AddGloballyTrustedCert(&trustedCert) == FALSE) {
+  if(AddGloballyTrustedCert(&trustedCert, cafile) == FALSE) {
     return -1;
   }
 
@@ -111,81 +180,3 @@ int main(int argc, char **argv) {
   return CRYPT_OK;
 
 }
-
-
-
-int AddGloballyTrustedCert(CRYPT_CERTIFICATE *trustedCert) {
-	int status;
-
-	/* Read the CA root certificate and make it trusted */
-	status = importCertFromTemplate(trustedCert, "/Users/bray/github/ssl/src/cryptlibconnect/ALL_RSA_CAS.pem", 1 );
-	if( cryptStatusError( status ) )
-		{
-		puts( "Couldn't read certificate from file, skipping test of trusted "
-			  "certificate write..." );
-		return( TRUE );
-		}
-	cryptSetAttribute( *trustedCert, CRYPT_CERTINFO_TRUSTED_IMPLICIT, TRUE );
-
-	/* Update the config file with the globally trusted certificate */
-	status = cryptSetAttribute( CRYPT_UNUSED, CRYPT_OPTION_CONFIGCHANGED,
-								FALSE );
-	if( cryptStatusError( status ) )
-		{
-		printf( "Globally trusted certificate add failed with error code "
-				"%d, line %d.\n", status, __LINE__ );
-		return( FALSE );
-		}
-
-#if 0
-  /* Make the certificate untrusted and update the config again */
-	cryptSetAttribute( *trustedCert, CRYPT_CERTINFO_TRUSTED_IMPLICIT, FALSE );
-	status = cryptSetAttribute( CRYPT_UNUSED, CRYPT_OPTION_CONFIGCHANGED,
-								FALSE );
-	if( cryptStatusError( status ) )
-		{
-		printf( "Globally trusted certificate delete failed with error code "
-				"%d, line %d.\n", status, __LINE__ );
-		return( FALSE );
-		}
-#endif
-
-	puts( "Globally trusted certificate add succeeded.\n" );
-	return( TRUE );
-}
-
-int DeleteGloballyTrustedCert(CRYPT_CERTIFICATE trustedCert) {
-	int status;
-
-	/* Make the certificate untrusted and update the config again */
-	cryptSetAttribute( trustedCert, CRYPT_CERTINFO_TRUSTED_IMPLICIT, FALSE );
-	status = cryptSetAttribute( CRYPT_UNUSED, CRYPT_OPTION_CONFIGCHANGED,
-								FALSE );
-	if( cryptStatusError( status ) )
-		{
-		printf( "Globally trusted certificate delete failed with error code "
-				"%d, line %d.\n", status, __LINE__ );
-		return( FALSE );
-		}
-
-	return( TRUE );
-}
-
-
-int importCertFromTemplate( CRYPT_CERTIFICATE *cryptCert,
-							const C_STR fileTemplate, const int number )
-	{
-	BYTE filenameBuffer[ FILENAME_BUFFER_SIZE ];
-#ifdef UNICODE_STRINGS
-	wchar_t wcBuffer[ FILENAME_BUFFER_SIZE ];
-#endif /* UNICODE_STRINGS */
-
-	filenameFromTemplate( filenameBuffer, fileTemplate, number );
-#ifdef UNICODE_STRINGS
-	mbstowcs( wcBuffer, filenameBuffer, strlen( filenameBuffer ) + 1 );
-	return( importCertFile( cryptCert, wcBuffer ) );
-#else
-	return( importCertFile( cryptCert, filenameBuffer ) );
-#endif /* UNICODE_STRINGS */
-	}
-
