@@ -133,10 +133,9 @@ L_CLOSE_ERR:
 
 int main(int argc, char **argv)
 {
-	int			rc, CAstreamLen;
+	int			rc;
 	sslKeys_t		*keys;
 	sslSessionId_t		*sid;
-	char			*CAstream;
 
 	char *host = argv[1];
 	int port = atoi(argv[2]);
@@ -154,30 +153,14 @@ int main(int argc, char **argv)
 /*
 	File based keys
 */
-	CAstreamLen = 0;
-	CAstreamLen += (int)strlen(cafile) + 1;
-	if (CAstreamLen > 0) {
-		CAstream = psMalloc(NULL, CAstreamLen);
-		memset(CAstream, 0x0, CAstreamLen);
-	} else {
-		CAstream = NULL;
-	}
-	
-	CAstreamLen = 0;
-	memcpy(CAstream, cafile, strlen(cafile));
-	CAstreamLen += strlen(cafile);
 
 	if ((rc = matrixSslLoadRsaKeys(keys, NULL, NULL, NULL,
-		(char*)CAstream)) < 0) {
+		(char*)cafile)) < 0) {
 		TRACE("No certificate material loaded.  Exiting\n");
-		if (CAstream) psFree(CAstream);
 		matrixSslDeleteKeys(keys);
 		matrixSslClose();
 		return rc;
 	}
-
-	if (CAstream) psFree(CAstream);
-
 
 	matrixSslNewSessionId(&sid);
 	rc = startClientConnection(keys, sid, host, port);
