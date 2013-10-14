@@ -1,14 +1,12 @@
 CC = gcc
+CFLAGS= -I/usr/local/lib/cryptlib
+LIBS= -L/usr/local/lib/cryptlib
+
 connect: connect.o 
-	#utils.o
-	#$(CC) connect.o -lcl -L/Users/bray/github/ssl/src/cryptlib -lpthread -o connect
-	$(CC) connect.o -lcl -L../cryptlib -lpthread -o connect
+	$(CC) connect.o -lcl $(LIBS) -lpthread -o connect
 
 connect.o: connect.c
-	#$(CC) -c -I/Users/bray/github/ssl/src/cryptlib connect.c 
-	$(CC) -c -I../cryptlib connect.c 
-#utils.o: utils.c
-#	$(CC) -c -I/Users/bray/github/ssl/src/cryptlib utils.c 
+	$(CC) -c $(CFLAGS) connect.c 
 
 clean:
 	rm connect connect.o 
