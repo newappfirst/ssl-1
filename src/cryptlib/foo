@@ -1,0 +1,86 @@
+./bindings/cryptlib.bas:  Public Const CRYPT_ERROR_TIMEOUT As Long = -25 ' Operation timed out before completion 
+./bindings/cryptlib.pas:  CRYPT_ERROR_TIMEOUT = -25; {  Operation timed out before completion  }
+./bindings/PerlCryptLib.ph:	sub CRYPT_ERROR_TIMEOUT { -25 }
+./bindings/python.c:    else if (status == CRYPT_ERROR_TIMEOUT)
+./bindings/python.c:        o = Py_BuildValue("(is)", CRYPT_ERROR_TIMEOUT, "Operation timed out before completion");
+./bindings/python.c:    PyDict_SetItemString(moduleDict, "CRYPT_ERROR_TIMEOUT", v);
+./cryptlib.h:#define CRYPT_ERROR_TIMEOUT		( -25 )	/* Operation timed out before completion */
+./device/ms_capi.c:			return( CRYPT_ERROR_TIMEOUT );
+./device/pkcs11.c:			return( CRYPT_ERROR_TIMEOUT );
+./io/file.c:	  fraction of a second) or return CRYPT_ERROR_TIMEOUT depending on how
+./io/file.c:				return( CRYPT_ERROR_TIMEOUT );
+./io/file.c:				status = CRYPT_ERROR_TIMEOUT;
+./io/http_parse.c:	{ 504, "504", "Gateway Time-out", 16, CRYPT_ERROR_TIMEOUT },
+./io/http_rd.c:		   be reported as a CRYPT_ERROR_TIMEOUT by the lower-level read
+./io/http_rd.c:		retExt( CRYPT_ERROR_TIMEOUT,
+./io/http_rd.c:				( CRYPT_ERROR_TIMEOUT, NETSTREAM_ERRINFO, 
+./io/http_wr.c:   reported as a CRYPT_ERROR_TIMEOUT by the lower-level network I/O 
+./io/http_wr.c:		retExt( CRYPT_ERROR_TIMEOUT, 
+./io/http_wr.c:				( CRYPT_ERROR_TIMEOUT, NETSTREAM_ERRINFO, 
+./io/stream.c:					retExt( CRYPT_ERROR_TIMEOUT, 
+./io/stream.c:							( CRYPT_ERROR_TIMEOUT, NETSTREAM_ERRINFO, 
+./io/stream.c:				retExt( CRYPT_ERROR_TIMEOUT,
+./io/stream.c:						( CRYPT_ERROR_TIMEOUT, NETSTREAM_ERRINFO, 
+./io/stream.c:					retExt( CRYPT_ERROR_TIMEOUT, 
+./io/stream.c:							( CRYPT_ERROR_TIMEOUT, NETSTREAM_ERRINFO, 
+./io/stream.c:				retExt( CRYPT_ERROR_TIMEOUT, 
+./io/stream.c:						( CRYPT_ERROR_TIMEOUT, NETSTREAM_ERRINFO, 
+./io/tcp.c:	{ WSAETIMEDOUT, CRYPT_ERROR_TIMEOUT, FALSE,
+./io/tcp.c:	{ ETIMEDOUT, CRYPT_ERROR_TIMEOUT, FALSE,
+./io/tcp.c:		return( CRYPT_ERROR_TIMEOUT );
+./io/tcp.c:		return( CRYPT_ERROR_TIMEOUT );
+./io/tcp.c:				retExt( CRYPT_ERROR_TIMEOUT,
+./io/tcp.c:						( CRYPT_ERROR_TIMEOUT, NETSTREAM_ERRINFO,
+./io/tcp.c:	return( CRYPT_ERROR_TIMEOUT );
+./io/tcp.c:  #define checkFirewallError( netStream )	CRYPT_ERROR_TIMEOUT
+./io/tcp.c:								CRYPT_ERROR_TIMEOUT, FALSE ) );
+./io/tcp.c:								CRYPT_ERROR_TIMEOUT, FALSE ) );
+./io/tcp.c:								   CRYPT_ERROR_TIMEOUT );
+./io/tcp.c:	  > 0			0			CRYPT_ERROR_TIMEOUT
+./io/tcp.c:			if( status == CRYPT_ERROR_TIMEOUT && \
+./kernel/attr_acl.c:	CRYPT_OK, CRYPT_ERROR_TIMEOUT, CRYPT_ERROR };
+./kernel/sendmsg.c:		return( CRYPT_ERROR_TIMEOUT );
+./kernel/sendmsg.c:		return( CRYPT_ERROR_TIMEOUT );
+./kernel/sendmsg.c:		return( CRYPT_ERROR_TIMEOUT );
+./keyset/ldap.c:			return( CRYPT_ERROR_TIMEOUT );
+./misc/user_cfg.c:			return( CRYPT_ERROR_TIMEOUT );
+./README:The CRYPT_ERROR_BUSY status has been renamed to CRYPT_ERROR_TIMEOUT to make it
+./session/sess_rw.c:	> 0			  0				CRYPT_ERROR_TIMEOUT
+./session/sess_rw.c:   CRYPT_ERROR_TIMEOUT for a context tied to a device, however even this 
+./session/sess_rw.c:		retExt( CRYPT_ERROR_TIMEOUT,
+./session/sess_rw.c:				( CRYPT_ERROR_TIMEOUT, SESSION_ERRINFO, 
+./session/sess_rw.c:	if( cryptStatusError( status ) && status != CRYPT_ERROR_TIMEOUT )
+./session/sess_rw.c:	if( status == CRYPT_ERROR_TIMEOUT )
+./session/sess_rw.c:			retExt( CRYPT_ERROR_TIMEOUT,
+./session/sess_rw.c:					( CRYPT_ERROR_TIMEOUT, SESSION_ERRINFO, 
+./session/sess_rw.c:		retExt( CRYPT_ERROR_TIMEOUT,
+./session/sess_rw.c:				( CRYPT_ERROR_TIMEOUT, SESSION_ERRINFO, 
+./session/sess_rw.c:			1. An error code, but not CRYPT_ERROR_TIMEOUT, which is handled
+./session/ssh1.c:			retExt( sessionInfoPtr, CRYPT_ERROR_TIMEOUT,
+./session/ssh2_rd.c:				retExt( CRYPT_ERROR_TIMEOUT,
+./session/ssh2_rd.c:						( CRYPT_ERROR_TIMEOUT, SESSION_ERRINFO, 
+./session/ssl_rd.c:		retExt( CRYPT_ERROR_TIMEOUT,
+./session/ssl_rd.c:				( CRYPT_ERROR_TIMEOUT, SESSION_ERRINFO, 
+./session/ssl_rd.c:		retExt( CRYPT_ERROR_TIMEOUT,
+./session/ssl_rd.c:				( CRYPT_ERROR_TIMEOUT, SESSION_ERRINFO, 
+./session/ssl_rd.c:		retExt( CRYPT_ERROR_TIMEOUT, 
+./session/ssl_rd.c:				( CRYPT_ERROR_TIMEOUT, SESSION_ERRINFO, 
+./test/highlvl.c:	if( status == CRYPT_ERROR_TIMEOUT )
+./test/highlvl.c:	while( cryptAsyncQuery( cryptContext ) == CRYPT_ERROR_TIMEOUT )
+./test/s_cmp.c:	if( localSession && waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/s_cmp.c:	if( count == 0 && waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/s_cmp.c:	if( localSession && waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/s_scep.c:	if( localSession && waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/s_scep.c:		waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/sreqresp.c:	if( localSession && !isServer && waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/sreqresp.c:		if( localSession && waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/sreqresp.c:	if( localSession && !isServer && waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/sreqresp.c:		if( localSession && waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/sreqresp.c:	if( localSession && !isServer && waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/sreqresp.c:		if( localSession && waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/ssh.c:			if( waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/ssl.c:			if( waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/ssl.c:					 status == CRYPT_ERROR_TIMEOUT ) && \
+./test/ssl.c:					 status == CRYPT_ERROR_TIMEOUT ) && \
+./test/suiteb.c:	if( waitMutex() == CRYPT_ERROR_TIMEOUT )
+./test/utils.c:		return( CRYPT_ERROR_TIMEOUT );
