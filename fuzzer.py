@@ -18,7 +18,7 @@ test_scripts = ["./src/opensslconnect/connect","./src/polarconnect/connect", "./
 out_dir = "/tmp/results"
 temp_dir = "/tmp/fuzzer-%d/" % (os.getpid())
 ca_file = "./ca/root-ca.crt"
-key_file = "./keys/localhost.key"
+key_file = "./keys/base.key"
 cert_dir = sys.argv[1]
 batch_size = 2000
 if not os.path.exists(out_dir):
@@ -26,7 +26,7 @@ if not os.path.exists(out_dir):
 with open("./ca/root-ca.key") as f:
     buf = f.read()
     ca = crypto.load_privatekey(crypto.FILETYPE_PEM, buf)
-with open("./certs/localhost.crt") as f:
+with open("./certs/base.crt") as f:
     buf = f.read()
     base = crypto.load_certificate(crypto.FILETYPE_PEM, buf)
 certs = franken.util.load_dir(cert_dir)

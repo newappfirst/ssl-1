@@ -1,4 +1,2 @@
 *.o
 *.pyc
-certs/*
-keys/*
