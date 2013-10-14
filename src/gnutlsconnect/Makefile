@@ -1,4 +1,4 @@
 connect: connect.c
-	$(CC) -lgnutls connect.c -o connect
+	$(CC) connect.c -lgnutls -o connect
 clean:
 	rm connect
