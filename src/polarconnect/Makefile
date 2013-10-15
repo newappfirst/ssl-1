@@ -1,4 +1,4 @@
 connect: connect.c
-	$(CC) -lpolarssl connect.c -o connect
+	$(CC) connect.c -lpolarssl -o connect
 clean:
 	rm connect

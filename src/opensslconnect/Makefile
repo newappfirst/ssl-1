@@ -1,4 +1,4 @@
 connect: connect.c
-	$(CC) -lssl connect.c -o connect
+	$(CC) connect.c -lssl -o connect
 clean:
 	rm connect

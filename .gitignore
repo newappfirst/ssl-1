@@ -2,12 +2,6 @@
 *.pyc
 certs/*
 keys/*
-.swp
+*.swp
+*.pem
 
-src/cryptlibconnect/.connect.c.swp
-
-src/.connect.c.swp
-
-src/cryptlibconnect/ALL_RSA_CAS.pem
-
-src/cryptlibconnect/connect
