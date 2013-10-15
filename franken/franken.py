@@ -47,6 +47,10 @@ def generate(certificates, base_cert, signing_key, max_extensions=20, count=1, e
         sample = random.randint(0, max_extensions)
         choices = random.sample(extensions.keys(), sample)
         new_extensions = [random.choice(extensions[name]) for name in choices]
+        for extension in new_extensions:
+            if random.randint(0,2) < 0.25:
+                extension.set_critical(1 - extension.get_critical())
+
         cert.add_extensions(new_extensions)
 
         cert.sign(signing_key,"sha1")
