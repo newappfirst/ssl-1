@@ -19,7 +19,7 @@ def get_extension_dict(certs):
 def get_extensions(cert):
     return  [cert.get_extension(i) \
                 for i in range(0, cert.get_extension_count())]
-def generate(certificates, base_cert, signing_key, max_extensions=20, count=1, extensions = None):
+def generate(certificates, base_cert, signing_key, max_extensions=20, count=1, extensions = None, flip_probability=0.25):
     certs = []
     if extensions is None:
         extensions = get_extension_dict(certificates)
@@ -48,7 +48,7 @@ def generate(certificates, base_cert, signing_key, max_extensions=20, count=1, e
         choices = random.sample(extensions.keys(), sample)
         new_extensions = [random.choice(extensions[name]) for name in choices]
         for extension in new_extensions:
-            if random.randint(0,2) < 0.25:
+            if random.random() < flip_probability:
                 extension.set_critical(1 - extension.get_critical())
 
         cert.add_extensions(new_extensions)
