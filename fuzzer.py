@@ -44,7 +44,6 @@ def run_fuzzer(test_scripts, results_dir, temp_base, ca_file, key_file, cert_dir
                 continue
             shutil.move(os.path.join(temp_dir, cert),\
                     os.path.join(out, hashfile(cert_path)))
-        shutil.rmtree(temp_dir)
         end = time.time()
         print("Iteration done. Found %d Time Elapsed %f" % (len(difs.keys()), end - start))
 
