@@ -177,8 +177,8 @@ int main( int argc, char *argv[] )
     {
         if( ret != POLARSSL_ERR_NET_WANT_READ && ret != POLARSSL_ERR_NET_WANT_WRITE )
         {
-            printf( " failed\n  ! ssl_handshake returned -0x%x\n\n", -ret );
-            goto exit;
+		printf("%d\n", ret);
+		return 0;
         }
     }
 
