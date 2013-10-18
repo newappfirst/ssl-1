@@ -1,17 +1,28 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <ctype.h>
 #include "cryptlib.h"
-#include "test/test.h"
 
 
 extern int add_globally_trusted_cert(CRYPT_CERTIFICATE *trustedCert, C_STR fileTemplate);
 extern int delete_globally_trusted_cert(CRYPT_CERTIFICATE trustedCert);
 
 #define __DETAILED__
+
 #define TRACE(s, ...) fprintf(stderr, s, ##__VA_ARGS__)
+#define BOOLEAN	int
+
+#define BYTE	unsigned char
+#ifndef TRUE
+  #define FALSE	0
+  #define TRUE	!FALSE
+#endif /* TRUE */
+
+#define paramStrlen( x )			strlen( x )
+
 
 
 int main(int argc, char **argv) {
