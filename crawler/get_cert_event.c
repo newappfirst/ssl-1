@@ -27,6 +27,7 @@
 #include <netdb.h>
 #include <string.h>
 #include <fcntl.h>
+#include <signal.h>
 
 pthread_mutex_t * ssl_locks;
 int ssl_num_locks;
@@ -238,6 +239,7 @@ int main(int argc, char *argv[])
 	struct config conf;
 	int ret;
 	FILE *fp;
+	signal(SIGPIPE, SIG_IGN);
 	SSL_load_error_strings();
 	SSL_library_init();
 	init_ssl_locking();
