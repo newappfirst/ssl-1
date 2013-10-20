@@ -12,17 +12,13 @@ extern int delete_globally_trusted_cert(CRYPT_CERTIFICATE trustedCert);
 
 #define __DETAILED__
 
-#define TRACE(s, ...) fprintf(stderr, s, ##__VA_ARGS__)
-#define BOOLEAN	int
 
-#define BYTE	unsigned char
+#define TRACE(s, ...) fprintf(stderr, s, ##__VA_ARGS__)
+
 #ifndef TRUE
   #define FALSE	0
   #define TRUE	!FALSE
 #endif /* TRUE */
-
-#define paramStrlen( x )			strlen( x )
-
 
 
 int main(int argc, char **argv) {
@@ -71,7 +67,7 @@ int main(int argc, char **argv) {
   serverName = host;
   status = cryptSetAttributeString( cryptSession,
 								CRYPT_SESSINFO_SERVER_NAME, serverName,
-								paramStrlen( serverName ) );
+								strlen( serverName ) );
   if (status != CRYPT_OK) {
     TRACE("Failed cryptSetAttribute CRYPT_SESSINFO_SERVER_NAME: %d\n", status);
     return -1;
@@ -96,7 +92,7 @@ int main(int argc, char **argv) {
 
 #ifdef __DETAILED__
 
-      BYTE buffer[ 1024 ];
+      unsigned char buffer[ 1024 ];
     	int length;
 
       status = cryptGetAttributeString( cryptSession,
