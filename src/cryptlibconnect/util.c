@@ -3,8 +3,13 @@
 
 #include <ctype.h>
 #include "cryptlib.h"
-#include "test/test.h"
 
+#ifndef TRUE
+  #define FALSE	0
+  #define TRUE	!FALSE
+#endif /* TRUE */
+
+#define BUFFER_SIZE			16384
 
 
 int import_cert_file( CRYPT_CERTIFICATE *cryptCert, const char* fileName ) {
@@ -12,7 +17,7 @@ int import_cert_file( CRYPT_CERTIFICATE *cryptCert, const char* fileName ) {
 	char buffer[ BUFFER_SIZE ];
 	int count;
 
-	if( ( filePtr = fopen( convertFileName( fileName ), "rb" ) ) == NULL )
+	if( ( filePtr = fopen(fileName, "rb" ) ) == NULL )
 		return( CRYPT_ERROR_OPEN );
 	count = fread( buffer, 1, BUFFER_SIZE, filePtr );
 	fclose( filePtr );
@@ -24,11 +29,12 @@ int import_cert_file( CRYPT_CERTIFICATE *cryptCert, const char* fileName ) {
 
 }
 
-int add_globally_trusted_cert(CRYPT_CERTIFICATE *trustedCert, C_STR fileTemplate) {
+int add_globally_trusted_cert(CRYPT_CERTIFICATE *trustedCert, C_STR fileName) {
+
 	int status;
 
 	/* Read the CA root certificate and make it trusted */
-	status = import_cert_from_template(trustedCert, fileTemplate, 1 );
+	status = import_cert_file(trustedCert, fileName);
 	if( cryptStatusError( status ) )
 		{
 		puts( "Couldn't read certificate from file, skipping test of trusted "
@@ -68,21 +74,4 @@ int delete_globally_trusted_cert(CRYPT_CERTIFICATE trustedCert) {
 	return( TRUE );
 }
 
-
-int import_cert_from_template( CRYPT_CERTIFICATE *cryptCert,
-							const C_STR fileTemplate, const int number )
-	{
-	BYTE filenameBuffer[ FILENAME_BUFFER_SIZE ];
-#ifdef UNICODE_STRINGS
-	wchar_t wcBuffer[ FILENAME_BUFFER_SIZE ];
-#endif /* UNICODE_STRINGS */
-
-	filenameFromTemplate( filenameBuffer, fileTemplate, number );
-#ifdef UNICODE_STRINGS
-	mbstowcs( wcBuffer, filenameBuffer, strlen( filenameBuffer ) + 1 );
-	return( import_cert_file( cryptCert, wcBuffer ) );
-#else
-	return( import_cert_file( cryptCert, filenameBuffer ) );
-#endif /* UNICODE_STRINGS */
-	}
 
