@@ -53,7 +53,7 @@ int add_globally_trusted_cert(CRYPT_CERTIFICATE *trustedCert, C_STR fileName) {
 		return( FALSE );
 		}
 
-	puts( "Globally trusted certificate add succeeded.\n" );
+  //puts( "Globally trusted certificate add succeeded.\n" );
 	return( TRUE );
 }
 
