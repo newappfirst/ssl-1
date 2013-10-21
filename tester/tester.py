@@ -4,10 +4,10 @@ import subprocess
 import multiprocessing
 import threading
 import time
+import collections
 MAX_BIND_RETRY = 10
 BIND_SLEEP = 0.25
-def _run_single_test(tupl):
-    certificate_file, key_file, ca_file, script, port = tupl
+def _run_single_test(certificate_file, key_file, ca_file, script, port, post_fn):
     thread = None
     # Try and bind the socket, since old addresses may still be in use try a few times before giving up(bleh)
     for i in range(MAX_BIND_RETRY):
@@ -29,8 +29,7 @@ def _run_single_test(tupl):
         return None
     finally:
         thread.join()
-    # Simple result check for now because :effort:
-    return output.strip()
+    return post_fn(output)
 def run_test(certificate_file, test_scripts, ca_file, key_file, starting_port = 10000, pool_size=4, pool = None):
     results = []
     close = False
@@ -42,17 +41,24 @@ def run_test(certificate_file, test_scripts, ca_file, key_file, starting_port = 
     if close:
         pool.close()
     return results
+def proxy(arg):
+    return arg[0], _run_single_test(*arg[1])
 def test_dir(certificate_dir, test_scripts, ca_file, key_file, starting_port = 10000, ending_port = 20000, pool_size = 4):
-    port = starting_port
+    def build_args(certs, scripts):
+        i = -1
+        for cert in certs:
+            for j,script in enumerate(scripts):
+                i += 1
+                yield (cert, j), (os.path.join(certificate_dir, cert), key_file, ca_file, script.script, starting_port + i, script.post_fn)
     pool = multiprocessing.Pool(pool_size)
-    results = dict()
-    for cert in os.listdir(certificate_dir):
-        cert_path = os.path.join(certificate_dir, cert)
-        results[cert] = run_test(cert_path, test_scripts, ca_file, key_file, starting_port, pool = pool)
-        #simple port updating/wraparound because :effort:
-        port += len(test_scripts)
-        if port > ending_port:
-            port = starting_port
+    certs = os.listdir(certificate_dir)
+    map_results = pool.imap(proxy, build_args(certs, test_scripts), 8)
+    def const():
+        return [ None for i in range(len(test_scripts))]
+    results = collections.defaultdict(const)
+    for k, v in map_results:
+        cert, j = k
+        results[cert][j] = v
     pool.close()
     return results
 if __name__ == "__main__":
