@@ -34,8 +34,8 @@ def run_fuzzer(test_scripts, results_dir, temp_base, ca_file, key_file, cert_dir
             os.mkdir(temp_dir)
         genned = franken.generate(certs, base, ca, max_extensions=6, count=batch_size, extensions = extensions)
         franken.util.dump_certs(genned, "fuzzer", temp_dir)
-        end = time.time()
         difs = run_dir(test_scripts, results_dir, temp_dir, ca_file, key_file)
+        end = time.time()
         print("Iteration done. Found %d Time Elapsed %f" % (len(difs.keys()), end - start))
 def run_dir(test_scripts, out_dir, in_dir, ca_file, key_file):
     difs = tester.util.find_discrepancies(in_dir, test_scripts, ca_file, key_file, ignore_none = True, pool_size=8)
