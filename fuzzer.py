@@ -26,8 +26,11 @@ def run_fuzzer(test_scripts, results_dir, temp_base, ca_file, key_file, cert_dir
     with open("./certs/base.crt") as f:
         buf = f.read()
         base = crypto.load_certificate(crypto.FILETYPE_PEM, buf)
+    print "Loading certs..."
     certs = franken.util.load_dir(cert_dir)
+    print "Building extension map..."
     extensions = franken.get_extension_dict(certs)
+    print "Starting testing..."
     while True:
         start = time.time()
         if not os.path.exists(temp_dir):
