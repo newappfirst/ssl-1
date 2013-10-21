@@ -2,19 +2,21 @@ from OpenSSL import crypto
 import random
 import collections
 def get_extension_dict(certs):
-    d = collections.defaultdict(set)
+    d = collections.defaultdict(dict)
     for cert in certs:
         extensions = get_extensions(cert)
-        for extension in extensions:
+        for i,extension in enumerate(extensions):
 
             """
             PyOpenSSL's get_short_name return UNKN for all unknown extensions
             This is bad for a mapping, so I added a get_oid function.
             See get_oid.patch
+
             """
-            d[extension.get_oid()].add(extension)
+            # stupid ghetto set to avoid func call overheads of wrapping :(
+            d[extension.get_oid()][extension.get_data()] = extension
     for k in d.keys():
-        d[k] = list(d[k])
+        d[k] = d[k].values()
     return d
 def get_extensions(cert):
     return  [cert.get_extension(i) \
