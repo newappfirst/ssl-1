@@ -22,6 +22,7 @@ class ServerThread(threading.Thread):
         self.port = port
         self.event = event
         self.bound = False
+        self.accepted = False
     def run(self):
         try :
             bindsock = socket.socket()
@@ -37,32 +38,19 @@ class ServerThread(threading.Thread):
         self.event.set()
         #Don't really care what happens from here out, if it fails it fails
         try:
+            bindsock.settimeout(0.2)
             sock, source = bindsock.accept()
             self.sock = sock
-            sslsock = ssl.wrap_socket(sock, keyfile = self.keyfile, certfile = self.certfile, server_side = True, ssl_version = ssl.PROTOCOL_SSLv23)
+            self.accepted = True
+            sslsock = ssl.wrap_socket(sock, keyfile = self.keyfile, certfile = self.certfile,\
+                    server_side = True, ssl_version = ssl.PROTOCOL_SSLv23, suppress_ragged_eofs=False)
             self.sslsock = sslsock
             #TODO: any recv we may or may not want
             #sslsock.recv()
             sslsock.close()
             bindsock.close()
-            sock.close()
         except:
             pass
-    def close(self):
-        try:
-            self.bindsock.close()
-        except:
-            pass
-        try:
-            self.sock.close()
-        except:
-            pass
-        try:
-            self.sslsock.close()
-        except:
-            pass
-
-
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 4:

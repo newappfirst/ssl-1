@@ -134,8 +134,8 @@ int main(int argc, char **argv) {
 
     }
     else {
-	    printf("%d\n", status);
-	    return 0;
+      TRACE("Failed to setup connection : %d\n", status);
+      return -1;
     }
   }
   else
