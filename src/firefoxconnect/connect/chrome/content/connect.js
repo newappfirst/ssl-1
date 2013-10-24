@@ -57,5 +57,5 @@ function onWindowLoad()
   }
   hostname=cmdLine.getArgument(0);
   port = cmdLine.getArgument(1);
-  connect("https://"+hostname+":443/");
+  connect("https://"+hostname+":"+port+"/");
 }
