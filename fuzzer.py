@@ -56,6 +56,9 @@ def run_dir(test_scripts, out_dir, in_dir, ca_file, key_file):
 
 def base_post_fn(output):
     return output.strip()
+def crypt_post_fn(output):
+    lines = output.split('\n')
+    return lines[0].strip()
 if __name__ == "__main__":
     out_dir = "/tmp/results"
     ca_file = "./ca/root-ca.crt"
@@ -66,5 +69,7 @@ if __name__ == "__main__":
     test_scripts = [ script("./src/opensslconnect/connect", base_post_fn),\
             script("./src/polarconnect/connect", base_post_fn),\
             script("./src/gnutlsconnect/connect", base_post_fn),\
-            script("./src/yasslconnect/connect", base_post_fn)]
+            script("./src/yasslconnect/connect", base_post_fn),\
+            script("./src/cryptlibconnect/connect", crypt_post_fn),\
+            ]
     run_fuzzer(test_scripts, out_dir, "/tmp", ca_file, key_file, cert_dir, batch_size)

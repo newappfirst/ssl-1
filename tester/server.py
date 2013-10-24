@@ -29,6 +29,7 @@ class ServerThread(threading.Thread):
             bindsock.bind(('',self.port))
             bindsock.listen(1)
             self.bound = True
+            self.bindsock = bindsock
         except:
             # Signal we are done (the caller needs to check we bound correctly!
             self.event.set()
@@ -37,12 +38,27 @@ class ServerThread(threading.Thread):
         #Don't really care what happens from here out, if it fails it fails
         try:
             sock, source = bindsock.accept()
+            self.sock = sock
             sslsock = ssl.wrap_socket(sock, keyfile = self.keyfile, certfile = self.certfile, server_side = True, ssl_version = ssl.PROTOCOL_SSLv23)
+            self.sslsock = sslsock
             #TODO: any recv we may or may not want
             #sslsock.recv()
             sslsock.close()
             bindsock.close()
             sock.close()
+        except:
+            pass
+    def close(self):
+        try:
+            self.bindsock.close()
+        except:
+            pass
+        try:
+            self.sock.close()
+        except:
+            pass
+        try:
+            self.sslsock.close()
         except:
             pass
 

@@ -28,7 +28,11 @@ def _run_single_test(certificate_file, key_file, ca_file, script, port, post_fn)
     except Exception:
         return None
     finally:
-        thread.join()
+        thread.join(0.1)
+        if thread.isAlive():
+            # hack because cryptlib wedges my server thread open, :(
+            # this will leak memory, thanks cryptlib
+            thread.close()
     return post_fn(output)
 def run_test(certificate_file, test_scripts, ca_file, key_file, starting_port = 10000, pool_size=4, pool = None):
     results = []
