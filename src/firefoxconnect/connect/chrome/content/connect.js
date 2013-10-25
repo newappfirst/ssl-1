@@ -24,13 +24,13 @@ function connect(url)
   req.addEventListener("error",
                        function(e) {
                          var error = createTCPErrorFromFailedXHR(req);
-                         dump('return val= '+error+'\n');
+                         dump(error+'\n');
 			 quit(1);
                        },
                        true);
  
   req.onload = function(e) {
-    dump('return val= 0\n');
+    dump('0\n');
     quit(1);
   };
 
