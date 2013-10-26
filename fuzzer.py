@@ -16,7 +16,7 @@ def hashfile(filepath):
     finally:
         f.close()
     return sha1.hexdigest()
-def run_fuzzer(test_scripts, results_dir, temp_base, ca_file, key_file, cert_dir, batch_size = 2000):
+def run_fuzzer(test_scripts, results_dir, temp_base, ca_dir, key_file, cert_dir, batch_size = 2000):
     temp_dir = os.path.join(temp_base, "fuzzer-%d/" % (os.getpid()))
     if not os.path.exists(results_dir):
         os.mkdir(results_dir)
@@ -37,11 +37,11 @@ def run_fuzzer(test_scripts, results_dir, temp_base, ca_file, key_file, cert_dir
             os.mkdir(temp_dir)
         genned = franken.generate(certs, base, ca, max_extensions=6, count=batch_size, extensions = extensions)
         franken.util.dump_certs(genned, "fuzzer", temp_dir)
-        difs = run_dir(test_scripts, results_dir, temp_dir, ca_file, key_file)
+        difs = run_dir(test_scripts, results_dir, temp_dir, ca_dir, key_file)
         end = time.time()
         print("Iteration done. Found %d Time Elapsed %f" % (len(difs.keys()), end - start))
-def run_dir(test_scripts, out_dir, in_dir, ca_file, key_file):
-    difs = tester.util.find_discrepancies(in_dir, test_scripts, ca_file, key_file, ignore_none = True, pool_size=8)
+def run_dir(test_scripts, out_dir, in_dir, ca_dir, key_file):
+    difs = tester.util.find_discrepancies(in_dir, test_scripts, ca_dir, key_file, ignore_none = True, pool_size=8)
     for cert, error in difs.items():
         error_str = '-'.join(map(str, error))
         out = os.path.join(out_dir, error_str)
@@ -61,16 +61,16 @@ def crypt_post_fn(output):
     return lines[0].strip()
 if __name__ == "__main__":
     out_dir = "/tmp/results"
-    ca_file = "./ca/root-ca.crt"
+    ca_dir = "./ca/"
     key_file = "./keys/base.key"
     cert_dir = sys.argv[1]
     batch_size = 100
-    script = namedtuple("script",["script","post_fn"])
-    test_scripts = [ script("./src/opensslconnect/connect", base_post_fn),\
-            script("./src/polarconnect/connect", base_post_fn),\
-            script("./src/gnutlsconnect/connect", base_post_fn),\
-            script("./src/yasslconnect/connect", base_post_fn),\
-            script("./src/matrixsslconnect/connect", base_post_fn),\
-            script("./src/cryptlibconnect/connect", crypt_post_fn),\
+    script = namedtuple("script",["script","post_fn", "ca_file"])
+    test_scripts = [ script("./src/opensslconnect/connect", base_post_fn, "root-ca.crt"),\
+            script("./src/polarconnect/connect", base_post_fn, "root-ca.crt"),\
+            script("./src/gnutlsconnect/connect", base_post_fn, "root-ca.crt"),\
+            script("./src/yasslconnect/connect", base_post_fn, "root-ca.crt"),\
+            script("./src/matrixsslconnect/connect", base_post_fn, "root-ca.crt"),\
+            script("./src/cryptlibconnect/connect", crypt_post_fn, "root-ca.crt"),\
             ]
-    run_fuzzer(test_scripts, out_dir, "/tmp", ca_file, key_file, cert_dir, batch_size)
+    run_fuzzer(test_scripts, out_dir, "/tmp", ca_dir, key_file, cert_dir, batch_size)

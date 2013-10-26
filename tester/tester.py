@@ -46,13 +46,14 @@ def run_test(certificate_file, test_scripts, ca_file, key_file, starting_port = 
     return results
 def proxy(arg):
     return arg[0], _run_single_test(*arg[1])
-def test_dir(certificate_dir, test_scripts, ca_file, key_file, starting_port = 10000, ending_port = 20000, pool_size = 4):
+def test_dir(certificate_dir, test_scripts, ca_dir, key_file, starting_port = 10000, ending_port = 20000, pool_size = 4):
     def build_args(certs, scripts):
         i = -1
         for cert in certs:
             for j,script in enumerate(scripts):
                 i += 1
-                yield (cert, j), (os.path.join(certificate_dir, cert), key_file, ca_file, script.script, starting_port + i, script.post_fn)
+                yield (cert, j), (os.path.join(certificate_dir, cert), key_file,
+                        os.path.join(ca_dir,script.ca_file), script.script, starting_port + i, script.post_fn)
     pool = multiprocessing.Pool(pool_size)
     certs = os.listdir(certificate_dir)
     map_results = pool.imap(proxy, build_args(certs, test_scripts), 8)
