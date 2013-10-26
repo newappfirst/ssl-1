@@ -70,6 +70,7 @@ if __name__ == "__main__":
             script("./src/polarconnect/connect", base_post_fn),\
             script("./src/gnutlsconnect/connect", base_post_fn),\
             script("./src/yasslconnect/connect", base_post_fn),\
+            script("./src/matrixsslconnect/connect", base_post_fn),\
             script("./src/cryptlibconnect/connect", crypt_post_fn),\
             ]
     run_fuzzer(test_scripts, out_dir, "/tmp", ca_file, key_file, cert_dir, batch_size)
