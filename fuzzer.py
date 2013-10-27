@@ -63,7 +63,7 @@ if __name__ == "__main__":
     out_dir = "/tmp/results"
     ca_dir = "./ca/"
     cert_dir = sys.argv[1]
-    batch_size = 10
+    batch_size = 20
     script = namedtuple("script",["script","post_fn", "ca_file"])
     test_scripts = [ script("./src/opensslconnect/connect", base_post_fn, "root-ca.crt"),\
             script("./src/polarconnect/connect", base_post_fn, "root-ca.crt"),\

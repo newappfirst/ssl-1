@@ -24,17 +24,15 @@ def _run_single_test(certificate_file, ca_file, script, port, post_fn):
     if not thread.bound:
         return None
     try:
-        print script, port, ca_file
-        output = subprocess.check_output([script,"127.0.0.1","%d" % (port), ca_file], stderr=subprocess.PIPE)
-        print script + " "+output
-        # Hack to catch some outputs not actually connecting due to internal errors, Weird libraries :(
-        if not thread.accepted:
-                return None
+        output = subprocess.check_output([script,"localhost","%d" % (port), ca_file], stderr=subprocess.PIPE)
     except Exception:
-        print "???"
         return None
     finally:
-        thread.join()
+        thread.join(0.1)
+        if thread.isAlive():
+            # hack because cryptlib wedges my server thread open, :(
+            # this will leak memory, thanks cryptlib
+            thread.close()
     return post_fn(output)
 def run_test(certificate_file, test_scripts, ca_file, starting_port = 10000, pool_size=4, pool = None):
     results = []
