@@ -21,43 +21,53 @@ def get_extension_dict(certs):
 def get_extensions(cert):
     return  [cert.get_extension(i) \
                 for i in range(0, cert.get_extension_count())]
-def generate(certificates, base_cert, signing_key, max_extensions=20, count=1, extensions = None, flip_probability=0.25):
+def generate_cert(certificates, signing_key, issuer, max_extensions, extensions, flip_probability=0.25):
+    cert = crypto.X509()
+    pkey = crypto.PKey()
+    pkey.generate_key(crypto.TYPE_RSA, 512)
+    # handle the boring entries
+    cert.set_pubkey(pkey)
+    cert.set_issuer(issuer)
+    pick = random.choice(certificates)
+    cert.set_notAfter(pick.get_notAfter())
+    pick = random.choice(certificates)
+    cert.set_notBefore(pick.get_notBefore())
+    pick = random.choice(certificates)
+    cert.set_serial_number(pick.get_serial_number())
+    pick = random.choice(certificates)
+    cert.set_subject(pick.get_subject())
+
+    # handle the extensions
+    # Currently we chose [0,max] extension types
+    # then pick one entry randomly from each type
+    # pyOpenSSL doesn't really support poking into the data
+    # so currently avoiding doing anything inside extensions
+    # TODO: Multiple extensions of the same type?
+    sample = random.randint(0, max_extensions)
+    choices = random.sample(extensions.keys(), sample)
+    new_extensions = [random.choice(extensions[name]) for name in choices]
+    for extension in new_extensions:
+        if random.random() < flip_probability:
+            extension.set_critical(1 - extension.get_critical())
+
+    cert.add_extensions(new_extensions)
+    cert.sign(signing_key,"sha1")
+    return pkey, cert
+def generate(certificates, base_cert, ca_key, max_extensions=20, max_depth = 3, count=1, extensions = None, flip_probability=0.25):
     certs = []
     if extensions is None:
         extensions = get_extension_dict(certificates)
     max_extensions = min(max_extensions, len(extensions.keys()))
     for i in range(count):
-        cert = crypto.X509()
-        # handle the boring entries
-        cert.set_pubkey(base_cert.get_pubkey())
-        cert.set_issuer(base_cert.get_issuer())
-        pick = random.choice(certificates)
-        cert.set_notAfter(pick.get_notAfter())
-        pick = random.choice(certificates)
-        cert.set_notBefore(pick.get_notBefore())
-        pick = random.choice(certificates)
-        cert.set_serial_number(pick.get_serial_number())
-        pick = random.choice(certificates)
-        cert.set_subject(pick.get_subject())
-
-        # handle the extensions
-        # Currently we chose [0,max] extension types
-        # then pick one entry randomly from each type
-        # pyOpenSSL doesn't really support poking into the data
-        # so currently avoiding doing anything inside extensions
-        # TODO: Multiple extensions of the same type?
-        sample = random.randint(0, max_extensions)
-        choices = random.sample(extensions.keys(), sample)
-        new_extensions = [random.choice(extensions[name]) for name in choices]
-        for extension in new_extensions:
-            if random.random() < flip_probability:
-                extension.set_critical(1 - extension.get_critical())
-
-        cert.add_extensions(new_extensions)
-
-        cert.sign(signing_key,"sha1")
-        certs.append(cert)
-    if count == 1:
-        return certs[0]
-    else:
-        return certs
+        chain = []
+        signing_key = ca_key
+        issuer = base_cert.get_issuer()
+        key = None
+        length = random.randint(1,max_depth)
+        for j in range(length):
+            key , cert = generate_cert(certificates, signing_key, issuer, max_extensions, extensions, flip_probability)
+            signing_key = key
+            issuer = cert.get_subject()
+            chain.append(cert)
+        certs.append((key,list(reversed(chain))))
+    return certs
