@@ -53,12 +53,21 @@ def generate_cert(certificates, signing_key, issuer, max_extensions, extensions,
     cert.add_extensions(new_extensions)
     cert.sign(signing_key,"sha1")
     return pkey, cert
-def generate(certificates, base_cert, ca_key, max_extensions=20, count=1, extensions = None, flip_probability=0.25):
+def generate(certificates, base_cert, ca_key, max_extensions=20, max_depth = 3, count=1, extensions = None, flip_probability=0.25):
     certs = []
     if extensions is None:
         extensions = get_extension_dict(certificates)
     max_extensions = min(max_extensions, len(extensions.keys()))
     for i in range(count):
-        cert = generate_cert(certificates, ca_key, base_cert.get_issuer(), max_extensions, extensions, flip_probability)
-        certs.append(cert)
+        chain = []
+        signing_key = ca_key
+        issuer = base_cert.get_issuer()
+        key = None
+        length = random.randint(1,max_depth)
+        for j in range(length):
+            key , cert = generate_cert(certificates, signing_key, issuer, max_extensions, extensions, flip_probability)
+            signing_key = key
+            issuer = cert.get_subject()
+            chain.append(cert)
+        certs.append((key,list(reversed(chain))))
     return certs

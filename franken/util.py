@@ -2,10 +2,11 @@ import os
 from OpenSSL import crypto
 def dump_certs(certs, prefix, path):
     for i,cert in enumerate(certs):
-        key,cert = cert
+        key,certs = cert
         with open(os.path.join(path, "%s-%d.pem" % (prefix, i)), "w") as f:
             f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key))
-            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+            for cert in certs:
+                f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
 def load_dir(path):      
     certs = []        
     files = os.listdir(path)                                               
