@@ -71,5 +71,6 @@ if __name__ == "__main__":
             script("./src/yasslconnect/connect", base_post_fn, "root-ca.crt"),\
             script("./src/matrixsslconnect/connect", base_post_fn, "root-ca.crt"),\
             script("./src/cryptlibconnect/connect", crypt_post_fn, "root-ca.crt"),\
+            script("./src/nssclient/connect", crypt_post_fn, "ca_cert_nss"),\
             ]
     run_fuzzer(test_scripts, out_dir, "/tmp", ca_dir, cert_dir, batch_size)
