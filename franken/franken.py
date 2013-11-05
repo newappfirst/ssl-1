@@ -27,7 +27,6 @@ def generate_cert(certificates, signing_key, issuer, max_extensions, extensions,
     pkey.generate_key(crypto.TYPE_RSA, 512)
     # handle the boring entries
     cert.set_pubkey(pkey)
-    cert.set_issuer(issuer)
     pick = random.choice(certificates)
     cert.set_notAfter(pick.get_notAfter())
     pick = random.choice(certificates)
@@ -36,6 +35,10 @@ def generate_cert(certificates, signing_key, issuer, max_extensions, extensions,
     cert.set_serial_number(pick.get_serial_number())
     pick = random.choice(certificates)
     cert.set_subject(pick.get_subject())
+    if not issuer is None:
+        cert.set_issuer(issuer)
+    else:
+        cert.set_issuer(cert.get_subject())
 
     # handle the extensions
     # Currently we chose [0,max] extension types
@@ -51,9 +54,13 @@ def generate_cert(certificates, signing_key, issuer, max_extensions, extensions,
             extension.set_critical(1 - extension.get_critical())
 
     cert.add_extensions(new_extensions)
-    cert.sign(signing_key,"sha1")
+    if not issuer is None:
+        cert.sign(signing_key,"sha1")
+    else:
+        cert.sign(pkey,"sha1")
     return pkey, cert
-def generate(certificates, base_cert, ca_key, max_extensions=20, max_depth = 3, count=1, extensions = None, flip_probability=0.25):
+def generate(certificates, base_cert, ca_key, max_extensions=20\
+        ,max_depth = 3, count=1, extensions = None, flip_probability=0.25, self_signed_probability = 0.25):
     certs = []
     if extensions is None:
         extensions = get_extension_dict(certificates)
@@ -64,6 +71,8 @@ def generate(certificates, base_cert, ca_key, max_extensions=20, max_depth = 3, 
         issuer = base_cert.get_issuer()
         key = None
         length = random.randint(1,max_depth)
+        if length == 1 and random.random() < self_signed_probability:
+            issuer = None
         for j in range(length):
             key , cert = generate_cert(certificates, signing_key, issuer, max_extensions, extensions, flip_probability)
             signing_key = key
